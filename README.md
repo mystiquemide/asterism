@@ -2,6 +2,10 @@
 
 **Family VIII: Asterism** - an 8th family for [Pattern Retrieval](https://patternretrieval.app) by Adam Ilenich (asterism.eth). Hopfield networks retrieving words from noise. CRT phosphor treatment. E-flat major generative audio. Lyric fragments from Joanna Newsom's "Emily" (Ys, 2006).
 
+[Live demo](https://asterism-art.vercel.app)
+
+![Asterism homepage](docs/screenshots/asterism-home.png)
+
 ---
 
 ## Why this exists
