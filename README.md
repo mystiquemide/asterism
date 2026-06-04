@@ -29,27 +29,7 @@ The asterism connection: Adam's ENS name means "a recognizable star pattern pull
 - **Generative score**: E-flat major (the key of "Emily"), per-pass bleeps, corruption wash, converge chime
 - **Record to video**: built-in MediaRecorder captures the canvas as .webm
 - **Hidden specimen 101**: unlocks after all 6 are viewed - reveals "for asterism.eth - @MystiqueMide"
-- **Energy display**: tracks the Hopfield energy as the network settles
-
-## Product Screens
-
-<img width="1280" height="609" alt="image" src="https://github.com/user-attachments/assets/a891263e-f990-4403-80ac-b8fb363c11b3" />
-
-<img width="1280" height="612" alt="image" src="https://github.com/user-attachments/assets/209997b1-da26-4064-9a08-7bb210adbc4b" />
-
-<img width="1280" height="613" alt="image" src="https://github.com/user-attachments/assets/384cb95e-dc9d-449d-bc1b-bfa6d632f2a0" />
-
-<img width="1280" height="604" alt="image" src="https://github.com/user-attachments/assets/f2e62ea0-2a10-477f-84f6-e8ae3a9919bb" />
-
-<img width="1280" height="609" alt="image" src="https://github.com/user-attachments/assets/f39394bf-9a3d-49b5-8fc3-564feeeb7741" />
-
-<img width="1280" height="609" alt="image" src="https://github.com/user-attachments/assets/14a86565-b42a-46ff-960b-191b411e9589" />
-
-
-
-
-
-
+- **Energy display**: tracks the Hopfield energy as the network settle
 
 ## Quick Start
 
