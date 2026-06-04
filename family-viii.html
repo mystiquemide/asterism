@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<!--
+  Family VIII: Asterism — an 8th family for Pattern Retrieval
+  Built by @MystiqueMide (x.com/MystiqueMide)
+  For asterism.eth — Adam Ilenich
+  Hopfield network · CRT phosphor · E-flat major
+  Joanna Newsom, "Emily" (Ys, 2006)
+  If you're reading this, the piece is mine. Don't strip the attribution.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="@MystiqueMide">
+<meta name="twitter:creator" content="@MystiqueMide">
+<title>Family VIII: Asterism — Pattern Retrieval</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a}
+  body{
+    display:flex;justify-content:center;align-items:center;
+    font-family:'Courier New',Courier,monospace;
+    color:#33ff66;user-select:none;-webkit-user-select:none;
+    flex-direction:column;gap:20px;
+  }
+  #header{text-align:center;opacity:0.7;font-size:12px;letter-spacing:2px;text-transform:uppercase}
+  #header .family{font-size:16px;opacity:1;color:#66ff88;letter-spacing:3px}
+  #canvas-wrap{position:relative;border-radius:18px;overflow:hidden;cursor:pointer}
+  canvas{display:block;image-rendering:pixelated}
+  #info-bar{display:flex;gap:40px;font-size:11px;opacity:0.6;text-shadow:0 0 6px #33ff66}
+  #info-bar span{min-width:80px;text-align:center}
+  #energy-bar{width:320px;height:3px;background:#1a2a1a;border-radius:2px;overflow:hidden}
+  #energy-fill{height:100%;background:#33ff66;width:100%;transition:width 0.3s;box-shadow:0 0 6px #33ff66}
+  #specimen-grid{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+  .spec-btn{
+    background:#0f1a0f;border:1px solid #1a3a1a;color:#33ff66;
+    padding:10px 16px;font-family:inherit;font-size:13px;cursor:pointer;
+    border-radius:8px;letter-spacing:2px;transition:all 0.2s;
+    text-shadow:0 0 6px #33ff66;position:relative;
+  }
+  .spec-btn:hover{background:#152515;border-color:#33ff66;box-shadow:0 0 12px rgba(51,255,102,0.15)}
+  .spec-btn.active{background:#1a3a1a;border-color:#66ff88;box-shadow:0 0 16px rgba(51,255,102,0.25);color:#66ff88}
+  .spec-btn.viewed{opacity:0.5;border-color:#0a1a0a}
+  .spec-btn.viewed::after{content:' ✓';font-size:10px;opacity:0.5}
+  .spec-btn .num{display:block;font-size:9px;opacity:0.4;letter-spacing:1px}
+  #hidden-btn{
+    background:#1a0f0a;border:1px solid #3a1a0a;color:#ffaa55;
+    padding:10px 20px;font-family:inherit;font-size:13px;cursor:pointer;
+    border-radius:8px;letter-spacing:3px;transition:all 0.8s;
+    text-shadow:0 0 8px #ffaa55;opacity:0;pointer-events:none;
+    transform:translateY(10px);
+  }
+  #hidden-btn.revealed{opacity:1;pointer-events:auto;transform:translateY(0)}
+  #hidden-btn:hover{background:#2a1a0a;border-color:#ffaa55;box-shadow:0 0 16px rgba(255,170,85,0.2)}
+  #dedication{position:absolute;bottom:50px;left:50%;transform:translateX(-50%);
+    font-size:12px;color:#ffaa55;opacity:0;text-align:center;pointer-events:none;z-index:10;
+    text-shadow:0 0 8px #ffaa55,0 0 16px #ffaa55;letter-spacing:1px;transition:opacity 2s}
+  @media(max-width:600px){#specimen-grid{gap:8px}.spec-btn{padding:8px 12px;font-size:11px}}
+</style>
+</head>
+<body>
+<div id="header">
+  PATTERN RETRIEVAL<br>
+  <span class="family">FAMILY VIII: ASTERISM</span><br>
+  <span style="font-size:10px;opacity:0.5">specimens 095–100  ·  key: E-flat major  ·  not every pattern is a character</span><br>
+  <span style="font-size:9px;opacity:0.55;letter-spacing:1px">by @MystiqueMide</span>
+</div>
+<div id="canvas-wrap">
+  <canvas id="c"></canvas>
+  <div id="dedication"></div>
+</div>
+<div id="info-bar">
+  <span id="spec-label">SPECIMEN</span>
+  <span id="pass-label">PASS</span>
+  <span id="energy-label">ENERGY</span>
+</div>
+<div id="energy-bar"><div id="energy-fill"></div></div>
+<div style="display:flex;gap:16px;align-items:center;margin-top:4px">
+  <button id="record-btn" style="background:#0f1a0f;border:1px solid #1a3a1a;color:#33ff66;padding:6px 16px;font-family:inherit;font-size:11px;cursor:pointer;border-radius:6px;letter-spacing:2px;text-shadow:0 0 6px #33ff66;transition:all 0.2s">● RECORD</button>
+  <span id="record-status" style="font-size:10px;opacity:0.4;font-family:inherit;color:#33ff66"></span>
+</div>
+<div id="specimen-grid">
+  <button class="spec-btn" data-idx="0"><span class="num">095</span>STARS</button>
+  <button class="spec-btn" data-idx="1"><span class="num">096</span>LIGHT</button>
+  <button class="spec-btn" data-idx="2"><span class="num">097</span>VOID</button>
+  <button class="spec-btn" data-idx="3"><span class="num">098</span>NAMES</button>
+  <button class="spec-btn" data-idx="4"><span class="num">099</span>EMBER</button>
+  <button class="spec-btn" data-idx="5"><span class="num">100</span>BRAVE</button>
+</div>
+<button id="hidden-btn"><span class="num" style="color:#ffaa55">101</span>ASTERISM</button>
+<script>
+/* ===================================================================
+   FAMILY VIII: ASTERISM
+   An 8th family for Pattern Retrieval. Specimens are words from
+   Joanna Newsom's "Emily" (Ys, 2006), retrieved via Hopfield
+   network with exact CRT treatment matching the original project.
+   Key: E-flat major. Hidden specimen 101 reveals the dedication.
+   =================================================================== */
+
+// ── CRT parameters (matching patternretrieval.app) ────────────
+const CRT = { barrel: 0.16, aberration: 3.2, scanlineBase: 0.08, scanlineEdge: 0.34, glow: 0.10, vignette: 0.85 };
+
+// ── Hopfield parameters ───────────────────────────────────────
+const LAMBDA = 0.35, TOTAL_PASSES = 8;
+
+// ── Specimens ─────────────────────────────────────────────────
+const SPECIMENS = ['STARS','LIGHT','VOID','NAMES','EMBER','BRAVE'];
+const HIDDEN    = 'ASTERISM';
+
+// ── Extended bitmap font ──────────────────────────────────────
+const CHAR_W = 10, CHAR_H = 14, GAP = 3;
+// Each glyph: array of strings, centered in CHAR_W × CHAR_H grid
+const FONT = {
+  A:['..##..','.##.##','.##.##','.##.##','######','.##.##','.##.##','.##.##'],
+  B:['#####.','.##.##','.##.##','.####.','.##.##','.##.##','.##.##','#####.'],
+  E:['######','.##...','.##...','.####.','.##...','.##...','.##...','######'],
+  G:['..###.','.##...','.##...','.##.##','.##.##','.##.##','..###.'],
+  H:['.##.##','.##.##','.##.##','######','.##.##','.##.##','.##.##','.##.##'],
+  I:['..##..','..##..','..##..','..##..','..##..','..##..','..##..','..##..'],
+  L:['.##...','.##...','.##...','.##...','.##...','.##...','.##...','######'],
+  M:['.##.##','#######','#######','.##.##','.##.##','.##.##','.##.##','.##.##'],
+  N:['.###.#','.##.##','.##.##','.##.##','.##.##','.##.##','.##.##','.#.##.'],
+  O:['..##..','.##.##','.##.##','.##.##','.##.##','.##.##','.##.##','..##..'],
+  R:['####..','.##.##','.##.##','.####.','.##.##','.##.##','.##.##','.##.##'],
+  S:['..###.','.##.##','.##...','..###.','....##','....##','.##.##','..###.'],
+  T:['######','..##..','..##..','..##..','..##..','..##..','..##..','..##..'],
+  V:['.##.##','.##.##','.##.##','.##.##','.##.##','.##.##','..##..','..##..'],
+};
+
+// ── Layout ────────────────────────────────────────────────────
+const PX = 5;  // buffer px per neuron
+const SCALE = 3.0;
+
+function wordGrid(word) {
+  const gw = word.length * CHAR_W + (word.length - 1) * GAP;
+  const gh = CHAR_H;
+  return { gw, gh, n: gw * gh };
+}
+
+function buildPattern(word) {
+  const { gw, gh, n } = wordGrid(word);
+  const pattern = new Float64Array(n);
+  for (let ci = 0; ci < word.length; ci++) {
+    const ch = word[ci];
+    const rows = FONT[ch] || FONT['E'];
+    const oy = Math.floor((CHAR_H - rows.length) / 2);
+    const col0 = ci * (CHAR_W + GAP);
+    for (let y = 0; y < rows.length; y++) {
+      const ox = Math.floor((CHAR_W - rows[y].length) / 2);
+      for (let x = 0; x < rows[y].length; x++) {
+        if (rows[y][x] === '#') pattern[(oy + y) * gw + col0 + ox + x] = 1;
+      }
+    }
+  }
+  for (let i = 0; i < n; i++) if (pattern[i] === 0) pattern[i] = -1;
+  return { pattern, gw, gh, n, onBits: pattern.reduce((a,v)=>a+(v===1?1:0),0) };
+}
+
+// ── Hopfield weights ──────────────────────────────────────────
+function buildWeights(pattern, n) {
+  const W = new Float64Array(n * n);
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      W[i * n + j] = (i === j) ? 0 : pattern[i] * pattern[j] / n;
+    }
+  }
+  return W;
+}
+
+function energy(state, W, n) {
+  let e = 0;
+  for (let i = 0; i < n; i++)
+    for (let j = i + 1; j < n; j++)
+      e -= W[i * n + j] * state[i] * state[j];
+  return e;
+}
+
+// ── Recall ────────────────────────────────────────────────────
+const BATCH_FRAC = 0.06;
+
+function recallTick(state, stored, W, n) {
+  const next = new Float64Array(state);
+  const batch = Math.max(1, Math.floor(n * BATCH_FRAC));
+  for (let k = 0; k < batch; k++) {
+    const i = Math.floor(Math.random() * n);
+    let h = 0;
+    for (let j = 0; j < n; j++) h += W[i * n + j] * next[j];
+    next[i] = (h + LAMBDA * stored[i]) > 0 ? 1 : -1;
+  }
+  return next;
+}
+
+function corrupt(state, frac) {
+  const out = new Float64Array(state);
+  for (let i = 0; i < out.length; i++)
+    if (Math.random() < frac) out[i] = -out[i];
+  return out;
+}
+
+function overlap(state, stored) {
+  let m = 0;
+  for (let i = 0; i < state.length; i++) if (state[i] === stored[i]) m++;
+  return m / state.length;
+}
+
+// ── Canvas ────────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const buf = document.createElement('canvas');
+const btx = buf.getContext('2d');
+
+function resize(gw, gh) {
+  const bw = gw * PX, bh = gh * PX;
+  const cw = Math.floor(bw * SCALE), ch = Math.floor(bh * SCALE);
+  canvas.width = cw; canvas.height = ch;
+  buf.width = bw; buf.height = bh;
+  return { bw, bh, cw, ch };
+}
+
+// ── CRT Render ────────────────────────────────────────────────
+function crtRender(state, gw, gh, color, glowAmount) {
+  const { bw, bh, cw, ch } = resize(gw, gh);
+  const cx = cw / 2, cy = ch / 2;
+
+  // Draw state to buffer
+  btx.fillStyle = '#0a0a0a';
+  btx.fillRect(0, 0, bw, bh);
+  for (let i = 0; i < state.length; i++) {
+    if (state[i] === 1) {
+      btx.fillStyle = color;
+      btx.fillRect((i % gw) * PX, Math.floor(i / gw) * PX, PX, PX);
+    }
+  }
+
+  ctx.fillStyle = '#0a0a0a';
+  ctx.fillRect(0, 0, cw, ch);
+
+  // Barrel distortion
+  ctx.save();
+  ctx.translate(cx, cy);
+  const barrelScale = 1 + CRT.barrel * ((gw * PX * SCALE) / 2000);
+  ctx.scale(barrelScale, barrelScale);
+  ctx.translate(-cx, -cy);
+
+  // Chromatic aberration
+  ctx.globalAlpha = 0.6;
+  ctx.save(); ctx.translate(CRT.aberration * 0.6, -CRT.aberration * 0.3);
+  ctx.drawImage(buf, 0, 0, cw, ch); ctx.restore();
+  ctx.save(); ctx.translate(-CRT.aberration * 0.6, CRT.aberration * 0.3);
+  ctx.globalAlpha = 0.5;
+  ctx.drawImage(buf, 0, 0, cw, ch); ctx.restore();
+
+  // Main channel
+  ctx.globalAlpha = 0.9;
+  ctx.drawImage(buf, 0, 0, cw, ch);
+  ctx.restore();
+
+  // Phosphor glow
+  if (glowAmount > 0.01) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = CRT.glow + glowAmount * 0.25;
+    ctx.filter = 'blur(' + (CRT.glow * 15 + glowAmount * 6) + 'px)';
+    ctx.drawImage(buf, 0, 0, cw, ch);
+    ctx.filter = 'none';
+    ctx.restore();
+  }
+
+  // Scanlines (stronger at edges)
+  for (let y = 0; y < ch; y += 3) {
+    const edgeDist = Math.min(y, ch - y) / (ch / 2);
+    const alpha = CRT.scanlineBase + (1 - edgeDist) * (CRT.scanlineEdge - CRT.scanlineBase);
+    ctx.fillStyle = 'rgba(0,0,0,' + alpha + ')';
+    ctx.fillRect(0, y, cw, 1);
+  }
+
+  // Vignette
+  const vg = ctx.createRadialGradient(cx, cy, cw * 0.3, cx, cy, cw * 0.72);
+  vg.addColorStop(0, 'rgba(0,0,0,0)');
+  vg.addColorStop(1, 'rgba(0,0,0,' + CRT.vignette + ')');
+  ctx.fillStyle = vg;
+  ctx.fillRect(0, 0, cw, ch);
+
+  // Flicker
+  if (Math.random() < 0.03) {
+    ctx.fillStyle = 'rgba(255,255,255,0.03)';
+    ctx.fillRect(0, Math.random() * ch, cw, 1 + Math.random() * 2);
+  }
+}
+
+// ── Audio ─────────────────────────────────────────────────────
+const EB = [311.13,349.23,392.00,415.30,466.16,523.25,587.33,622.25,698.46,783.99,880.00,932.33];
+let ac = null;
+
+function initAudio() { if (!ac) ac = new (window.AudioContext||window.webkitAudioContext)(); }
+function tone(freq, dur, vol = 0.05, type = 'sine') {
+  if (!ac) return;
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol, ac.currentTime);
+  g.gain.exponentialRampToValueAtTime(1e-4, ac.currentTime + dur);
+  o.connect(g); g.connect(ac.destination);
+  o.start(); o.stop(ac.currentTime + dur);
+}
+function wash() { if(ac){const o=ac.createOscillator(),g=ac.createGain();o.type='sawtooth';o.frequency.value=55;g.gain.setValueAtTime(0.02,ac.currentTime);g.gain.exponentialRampToValueAtTime(1e-4,ac.currentTime+3);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+3)} }
+function bleep(n) { tone(EB[n%EB.length], 0.2, 0.03, 'square'); }
+function chime() {
+  if (!ac) return;
+  [EB[0],EB[2],EB[4],EB[7],EB[9]].forEach((f,i)=>setTimeout(()=>tone(f,1.5,0.04,'sine'),i*100));
+}
+
+// ── UI refs ───────────────────────────────────────────────────
+const btns       = document.querySelectorAll('.spec-btn');
+const hiddenBtn  = document.getElementById('hidden-btn');
+const dedEl      = document.getElementById('dedication');
+const specLabel  = document.getElementById('spec-label');
+const passLabel  = document.getElementById('pass-label');
+const energyLabel= document.getElementById('energy-label');
+const energyFill = document.getElementById('energy-fill');
+const canvasWrap = document.getElementById('canvas-wrap');
+
+// ── Recording ──────────────────────────────────────────────────
+const recordBtn    = document.getElementById('record-btn');
+const recordStatus = document.getElementById('record-status');
+let mediaRecorder = null, recordedChunks = [];
+
+function startRecording() {
+  if (!canvas || !canvas.captureStream) { recordStatus.textContent = 'browser not supported'; return; }
+  recordedChunks = [];
+  const stream = canvas.captureStream(30);
+  // Also capture audio if available
+  if (ac) {
+    try {
+      const audioDest = ac.createMediaStreamDestination();
+      // Re-route existing connections is complex; skip audio for reliability
+    } catch(e) {}
+  }
+  try {
+    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
+  } catch(e) {
+    try {
+      mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8' });
+    } catch(e2) {
+      mediaRecorder = new MediaRecorder(stream);
+    }
+  }
+  mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+  mediaRecorder.onstop = () => {
+    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'asterism-family-viii.webm'; a.click();
+    URL.revokeObjectURL(url);
+    recordStatus.textContent = 'saved';
+    recordBtn.textContent = '● RECORD';
+    recordBtn.style.color = '#33ff66'; recordBtn.style.borderColor = '#1a3a1a';
+    mediaRecorder = null;
+  };
+  mediaRecorder.start();
+  recordBtn.textContent = '■ STOP';
+  recordBtn.style.color = '#ff4444'; recordBtn.style.borderColor = '#ff4444';
+  recordStatus.textContent = 'recording...';
+  // Auto-stop after ~35s (one full cycle)
+  setTimeout(() => { if (mediaRecorder && mediaRecorder.state === 'recording') stopRecording(); }, 35000);
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+    recordStatus.textContent = 'processing...';
+  }
+}
+
+recordBtn.addEventListener('click', () => {
+  initAudio();
+  if (mediaRecorder && mediaRecorder.state === 'recording') { stopRecording(); }
+  else { startRecording(); }
+});
+
+// ── State ─────────────────────────────────────────────────────
+const viewed = new Array(SPECIMENS.length + 1).fill(false); // +1 for hidden
+let activeIdx = -1;
+let curData = null; // { word, pattern, stored, W, gw, gh, n, onBits, ... }
+let phase, tick, passCount, cur, converged;
+let animId = null;
+const TAU = TOTAL_PASSES * 55;
+const CORRUPT = 90;
+
+// ── Reset retrieval for current specimen ──────────────────────
+function resetRetrieval() {
+  if (!curData) return;
+  cur = Float64Array.from(curData.stored);
+  phase = 'corrupt';
+  tick = 0; passCount = 0; converged = false;
+  passLabel.textContent = 'PASS 0/8';
+  energyFill.style.width = '100%';
+  energyLabel.textContent = 'E = —';
+  dedEl.style.opacity = '0';
+  dedEl.textContent = '';
+}
+
+// ── Animation loop ────────────────────────────────────────────
+function animate() {
+  if (!curData) { animId = requestAnimationFrame(animate); return; }
+  const { stored, W, gw, gh, n } = curData;
+  tick++;
+
+  if (phase === 'corrupt') {
+    const frac = Math.min(tick / CORRUPT, 1) * 0.55;
+    cur = corrupt(stored, frac);
+    passLabel.textContent = 'NOISE ' + Math.round(frac*100) + '%';
+    if (tick === 40) wash();
+    if (tick >= CORRUPT) { phase = 'recall'; tick = 0; passLabel.textContent = 'PASS 0/8'; }
+  } else if (phase === 'recall') {
+    cur = recallTick(cur, stored, W, n);
+    const p = Math.floor(tick / 55);
+    if (p > passCount && p <= TOTAL_PASSES) {
+      passCount = p;
+      passLabel.textContent = 'PASS ' + passCount + '/' + TOTAL_PASSES;
+      bleep(passCount);
+    }
+    const ol = overlap(cur, stored);
+    const en = energy(cur, W, n);
+    const e0 = energy(stored, W, n);
+    // Energy ratio (absolute: both negative, so higher = less negative = closer to basin floor)
+    const eRatio = Math.max(0, Math.min(1, en / e0));
+    energyFill.style.width = (eRatio * 100) + '%';
+    energyLabel.textContent = 'E = ' + en.toFixed(1);
+
+    if (!converged && ol > 0.9) {
+      converged = true;
+      chime();
+      // If this is the hidden specimen, show dedication
+      if (activeIdx === SPECIMENS.length) {
+        setTimeout(() => {
+          dedEl.textContent = 'for asterism.eth  \u2014 @MystiqueMide';
+          dedEl.style.opacity = '1';
+        }, 1200);
+      }
+      // Mark as viewed
+      if (activeIdx >= 0 && !viewed[activeIdx]) {
+        viewed[activeIdx] = true;
+        updateButtons();
+      }
+    }
+    if (passCount >= TOTAL_PASSES && converged && tick > TAU + 60) {
+      phase = 'complete';
+      passLabel.textContent = 'RECALLED';
+    } else if (passCount >= TOTAL_PASSES && !converged && tick > TAU + 120) {
+      cur = Float64Array.from(stored);
+      phase = 'complete';
+      passLabel.textContent = 'RECALLED';
+      if (!converged) {
+        chime();
+        if (activeIdx >= 0 && !viewed[activeIdx]) { viewed[activeIdx] = true; updateButtons(); }
+        converged = true;
+      }
+    }
+  }
+
+  // Color
+  let color, glow;
+  if (converged && phase === 'complete') { color = '#ffaa55'; glow = 0.35; }
+  else if (converged) { color = '#ffaa55'; glow = 0.32; }
+  else if (phase === 'corrupt') { color = '#33ff66'; glow = 0.02; }
+  else {
+    const t = Math.min(passCount / TOTAL_PASSES, 1);
+    const r = 51 + t * 204, g = 255 - t * 85, b = 102 - t * 68;
+    color = '#'+[r,g,b].map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');
+    glow = 0.06 + t * 0.22;
+  }
+
+  crtRender(cur, gw, gh, color, glow);
+  animId = requestAnimationFrame(animate);
+}
+
+// ── Select specimen ───────────────────────────────────────────
+function selectSpecimen(idx) {
+  if (idx === activeIdx) return;
+  initAudio();
+  activeIdx = idx;
+  const word = idx < SPECIMENS.length ? SPECIMENS[idx] : HIDDEN;
+  const built = buildPattern(word);
+  curData = {
+    word,
+    pattern: built.pattern,
+    stored: new Float64Array(built.pattern),
+    W: buildWeights(built.pattern, built.n),
+    gw: built.gw, gh: built.gh, n: built.n, onBits: built.onBits
+  };
+  specLabel.textContent = 'SPECIMEN ' + (idx < SPECIMENS.length ? '0'+(95+idx) : '101');
+  resetRetrieval();
+  updateButtons();
+
+  // Compute reference energy
+  const e0 = energy(curData.stored, curData.W, curData.n);
+  energyLabel.textContent = 'E₀ = ' + e0.toFixed(1);
+  energyFill.style.width = '100%';
+}
+
+function updateButtons() {
+  btns.forEach((btn, i) => {
+    btn.classList.toggle('active', i === activeIdx);
+    btn.classList.toggle('viewed', viewed[i]);
+  });
+  hiddenBtn.classList.toggle('active', activeIdx === SPECIMENS.length);
+  if (viewed[SPECIMENS.length]) hiddenBtn.classList.add('viewed');
+  // Reveal hidden button when all 6 viewed
+  const allViewed = viewed.slice(0, 6).every(Boolean);
+  if (allViewed) hiddenBtn.classList.add('revealed');
+}
+
+// ── Event handlers ────────────────────────────────────────────
+btns.forEach(btn => {
+  btn.addEventListener('click', () => selectSpecimen(parseInt(btn.dataset.idx)));
+});
+hiddenBtn.addEventListener('click', () => selectSpecimen(SPECIMENS.length));
+
+canvasWrap.addEventListener('click', (e) => {
+  if (e.target.tagName === 'CANVAS') initAudio();
+});
+
+document.addEventListener('click', initAudio, { once: true });
+document.addEventListener('touchstart', initAudio, { once: true });
+
+// ── Start ─────────────────────────────────────────────────────
+selectSpecimen(0);
+animId = requestAnimationFrame(animate);
+
+console.log('\u2606 FAMILY VIII: ASTERISM \u2014 Pattern Retrieval');
+console.log('Specimens 095-100: lyric fragments from Joanna Newsom\u2019s \u201cEmily\u201d');
+console.log('Key: E-flat major  |  \u03bb=' + LAMBDA + '  |  CRT: barrel=' + CRT.barrel + ' aberration=' + CRT.aberration + 'px');
+console.log('Built by @MystiqueMide  |  x.com/MystiqueMide');
+</script>
+</body>
+</html>

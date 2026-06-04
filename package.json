@@ -1,0 +1,15 @@
+{
+  "name": "asterism",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Family VIII: Asterism — pieces for Pattern Retrieval",
+  "author": "@MystiqueMide",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<!--
+  "You Taught Me the Names of the Stars"
+  Built by @MystiqueMide (x.com/MystiqueMide)
+  For asterism.eth — Adam Ilenich
+  Hopfield network · CRT phosphor · E-flat major
+  Joanna Newsom, "Emily" (Ys, 2006)
+  If you're reading this, the piece is mine. Don't strip the attribution.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="@MystiqueMide">
+<meta name="twitter:creator" content="@MystiqueMide">
+<title>You Taught Me the Names of the Stars</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #050505; }
+  body { display: flex; justify-content: center; align-items: center; flex-direction: column; font-family: 'Courier New', Courier, monospace; cursor: pointer; user-select: none; -webkit-user-select: none; }
+  #stage { position: relative; display: inline-block; }
+  canvas { display: block; image-rendering: pixelated; border-radius: 18px; }
+  #lyric, #dedication, #counter { position: absolute; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none; z-index: 10; }
+  #counter { top: 18px; right: 24px; left: auto; transform: none; font-size: 11px; color: #33ff66; opacity: 0.5; text-shadow: 0 0 6px #33ff66; }
+  #lyric { bottom: 36px; font-size: 14px; color: #33ff66; opacity: 0; max-width: 90%; letter-spacing: 0.5px; text-shadow: 0 0 10px #33ff66, 0 0 20px #33ff66, 0 0 40px #33ff66; transition: opacity 1.5s; }
+  #dedication { bottom: 70px; font-size: 13px; color: #ffaa55; opacity: 0; letter-spacing: 1px; text-shadow: 0 0 8px #ffaa55, 0 0 16px #ffaa55, 0 0 32px #ffaa55; transition: opacity 2s; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="stars"></canvas>
+  <canvas id="main"></canvas>
+  <div id="counter"></div>
+  <div id="lyric"></div>
+  <div id="dedication"></div>
+</div>
+<script>
+/* ================================================================
+   ASTERISM — You Taught Me the Names of the Stars
+   Hopfield network retrieving "ASTERISM" from noise.
+   CRT phosphor treatment. E-flat major generative audio.
+   Lyric fragments from Joanna Newsom's "Emily" (Ys, 2006).
+   ================================================================ */
+
+const CHAR_W = 12, CHAR_H = 18, GAP = 4, PX = 5, SCALE = 2.8;
+const WORD = "ASTERISM";
+const GW = WORD.length * CHAR_W + (WORD.length - 1) * GAP;
+const N = GW * CHAR_H;
+const BW = GW * PX, BH = CHAR_H * PX;
+const CW = Math.floor(BW * SCALE), CH = Math.floor(BH * SCALE);
+
+const main = document.getElementById('main'), stars = document.getElementById('stars');
+main.width = CW; main.height = CH;
+stars.width = CW; stars.height = CH;
+const ctx = main.getContext('2d'), sctx = stars.getContext('2d');
+const buf = document.createElement('canvas');
+buf.width = BW; buf.height = BH;
+const btx = buf.getContext('2d');
+
+const counterEl = document.getElementById('counter'), lyricEl = document.getElementById('lyric'), dedEl = document.getElementById('dedication');
+
+// ── Bitmap font ──────────────────────────────────────────────
+const FONT = {
+  A: ['.....##.....','....####....','...##.##....','..##..##....','..##..##....','.########...','.##....##...','.##....##...','.##....##...','.##....##...'],
+  S: ['..######....','.##....##...','.##.........','.#######....','..######....','.......##...','.##....##...','..######....'],
+  T: ['.########...','...##.......','...##.......','...##.......','...##.......','...##.......','...##.......','...##.......'],
+  E: ['.########...','.##.........','.##.........','.######.....','.##.........','.##.........','.########...'],
+  R: ['.########...','.##....##...','.##....##...','.########...','.##..##.....','.##...##....','.##....##...'],
+  I: ['..####......','...##.......','...##.......','...##.......','...##.......','...##.......','...##.......','..####......'],
+  M: ['.##....##...','.###..###...','.########...','.##.##.##...','.##.##.##...','.##....##...','.##....##...','.##....##...','.##....##...','.##....##...','.##....##...','.##....##...'],
+};
+
+function glyph(ch) {
+  const rows = FONT[ch] || FONT['E'];
+  const grid = Array.from({length: CHAR_H}, () => new Float64Array(CHAR_W));
+  const oy = Math.floor((CHAR_H - rows.length) / 2);
+  for (let y = 0; y < rows.length; y++) {
+    const ox = Math.floor((CHAR_W - rows[y].length) / 2);
+    for (let x = 0; x < rows[y].length; x++) if (rows[y][x] === '#') grid[oy + y][ox + x] = 1;
+  }
+  return grid;
+}
+
+// ── Stored pattern + Hebbian weights ────────────────────────
+const stored = new Float64Array(N);
+for (let ci = 0; ci < WORD.length; ci++) {
+  const g = glyph(WORD[ci]), col0 = ci * (CHAR_W + GAP);
+  for (let y = 0; y < CHAR_H; y++) for (let x = 0; x < CHAR_W; x++) if (g[y][x]) stored[y * GW + col0 + x] = 1;
+}
+for (let i = 0; i < N; i++) if (stored[i] === 0) stored[i] = -1;
+const onBits = stored.reduce((a, v) => a + (v === 1 ? 1 : 0), 0);
+
+const W = new Float64Array(N * N);
+for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) W[i * N + j] = (i === j) ? 0 : stored[i] * stored[j] / N;
+
+// ── Async recall ─────────────────────────────────────────────
+const BATCH = Math.max(1, Math.floor(N * 0.06));
+const LAMBDA = 0.35; // matching patternretrieval.app
+
+function recallTick(vec) {
+  const next = new Float64Array(vec);
+  for (let k = 0; k < BATCH; k++) {
+    const i = Math.floor(Math.random() * N);
+    let h = 0;
+    for (let j = 0; j < N; j++) h += W[i * N + j] * next[j];
+    next[i] = (h + LAMBDA * stored[i]) > 0 ? 1 : -1;
+  }
+  return next;
+}
+
+function overlap(vec) { let m = 0; for (let i = 0; i < N; i++) if (vec[i] === stored[i]) m++; return m / N; }
+function corrupt(vec, frac) { const out = new Float64Array(vec); for (let i = 0; i < N; i++) if (Math.random() < frac) out[i] = -out[i]; return out; }
+
+// ── Audio: E-flat major ──────────────────────────────────────
+const EB = [311.13,349.23,392.00,415.30,466.16,523.25,587.33,622.25,698.46,783.99,880.00,932.33];
+let ac = null;
+function initAudio() { if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)(); }
+function tone(freq, dur, vol = 0.05, type = 'sine') {
+  if (!ac) return;
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol, ac.currentTime);
+  g.gain.exponentialRampToValueAtTime(1e-4, ac.currentTime + dur);
+  o.connect(g); g.connect(ac.destination);
+  o.start(); o.stop(ac.currentTime + dur);
+}
+function wash() { if (!ac) return; const o = ac.createOscillator(), g = ac.createGain(); o.type = 'sawtooth'; o.frequency.value = 55; g.gain.setValueAtTime(0.022, ac.currentTime); g.gain.exponentialRampToValueAtTime(1e-4, ac.currentTime + 3); o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime + 3); }
+function bleep(n) { tone(EB[n % EB.length], 0.22, 0.035, 'square'); }
+function chime() { if (!ac) return; [EB[0],EB[2],EB[4],EB[7],EB[9]].forEach((f,i) => setTimeout(() => tone(f,1.6,0.045,'sine'), i*100)); }
+
+// ── Lyrics ───────────────────────────────────────────────────
+const LYRICS = ["you taught me the names of the stars overhead","that I wrote down in my ledger","the Pleiades loosed in December","I promised you I\u2019d set them to verse","so I\u2019d always remember","the meteorite is the source of the light","a bone thrown from the void","I\u2019ve seen your bravery and I will follow you there"];
+function showLyric(i) { lyricEl.textContent = '\u201c' + LYRICS[i % LYRICS.length] + '\u201d'; lyricEl.style.opacity = '0.82'; setTimeout(() => { lyricEl.style.opacity = '0'; }, 2600); }
+
+// ── Star particles ───────────────────────────────────────────
+const starPool = [];
+for (let i = 0; i < 80; i++) starPool.push({ x: Math.random() * CW, y: Math.random() * CH, r: Math.random() * 0.8 + 0.3, phase: Math.random() * Math.PI * 2, speed: Math.random() * 0.025 + 0.008, base: Math.random() * 0.25 + 0.08 });
+function drawStars(brightness) {
+  sctx.clearRect(0, 0, CW, CH);
+  for (const s of starPool) { s.phase += s.speed; const a = s.base + brightness * (0.5 + 0.5 * Math.sin(s.phase)); sctx.fillStyle = 'rgba(180,220,255,' + Math.min(1, a) + ')'; sctx.beginPath(); sctx.arc(s.x, s.y, s.r + brightness * 1.5, 0, Math.PI * 2); sctx.fill(); }
+}
+
+// ── CRT render (matching patternretrieval.app parameters) ───
+const CRT = { barrel: 0.16, aberration: 3.2, scanlineBase: 0.08, scanlineEdge: 0.34, glow: 0.10, vignette: 0.85 };
+function render(vec, color, glowAmount) {
+  btx.fillStyle = '#050505'; btx.fillRect(0, 0, BW, BH);
+  for (let i = 0; i < N; i++) if (vec[i] === 1) { btx.fillStyle = color; btx.fillRect((i % GW) * PX, Math.floor(i / GW) * PX, PX, PX); }
+  ctx.fillStyle = '#050505'; ctx.fillRect(0, 0, CW, CH);
+  const cx = CW / 2, cy = CH / 2;
+  ctx.save(); ctx.translate(cx, cy);
+  const bs = 1 + CRT.barrel * ((GW * PX * SCALE) / 2000);
+  ctx.scale(bs, bs); ctx.translate(-cx, -cy);
+  ctx.globalAlpha = 0.6; ctx.save(); ctx.translate(CRT.aberration * 0.6, -CRT.aberration * 0.3); ctx.drawImage(buf, 0, 0, CW, CH); ctx.restore();
+  ctx.save(); ctx.translate(-CRT.aberration * 0.6, CRT.aberration * 0.3); ctx.globalAlpha = 0.5; ctx.drawImage(buf, 0, 0, CW, CH); ctx.restore();
+  ctx.globalAlpha = 0.9; ctx.drawImage(buf, 0, 0, CW, CH); ctx.restore();
+  if (glowAmount > 0.01) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = CRT.glow + glowAmount * 0.25; ctx.filter = 'blur(' + (CRT.glow * 15 + glowAmount * 6) + 'px)'; ctx.drawImage(buf, 0, 0, CW, CH); ctx.filter = 'none'; ctx.restore(); }
+  for (let y = 0; y < CH; y += 3) { const ed = Math.min(y, CH - y) / (CH / 2); ctx.fillStyle = 'rgba(0,0,0,' + (CRT.scanlineBase + (1 - ed) * (CRT.scanlineEdge - CRT.scanlineBase)) + ')'; ctx.fillRect(0, y, CW, 1); }
+  const vg = ctx.createRadialGradient(cx, cy, CW * 0.3, cx, cy, CW * 0.72); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,' + CRT.vignette + ')'); ctx.fillStyle = vg; ctx.fillRect(0, 0, CW, CH);
+  if (Math.random() < 0.035) { ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fillRect(0, Math.random() * CH, CW, 1 + Math.random() * 2); }
+}
+
+// ── State machine ────────────────────────────────────────────
+const TP = 8, TPP = 55, CT = 90;
+let cur, pass, tick, converged, phase;
+function reset() { cur = Float64Array.from(stored); pass = 0; tick = 0; converged = false; phase = 'corrupt'; dedEl.style.opacity = '0'; lyricEl.style.opacity = '0'; counterEl.textContent = ''; drawStars(0); render(stored, '#33ff66', 0); }
+function update() {
+  tick++;
+  if (phase === 'corrupt') {
+    const frac = Math.min(tick / CT, 1) * 0.55; cur = corrupt(stored, frac); counterEl.textContent = Math.round(frac * 100) + '% noise';
+    if (tick === 45) { showLyric(0); wash(); }
+    if (tick >= CT) { phase = 'recall'; tick = 0; counterEl.textContent = 'PASS 0/' + TP; drawStars(0.05); }
+  } else if (phase === 'recall') {
+    cur = recallTick(cur);
+    const p = Math.floor(tick / TPP); if (p > pass && p <= TP) { pass = p; counterEl.textContent = 'PASS ' + pass + '/' + TP; bleep(pass); if ([2,4,6].includes(pass)) showLyric(pass / 2); }
+    const ol = overlap(cur); drawStars(ol * 0.65);
+    if (!converged && ol > 0.9) { converged = true; chime(); drawStars(0.7); setTimeout(() => { dedEl.textContent = 'for asterism.eth  \u2014 @MystiqueMide'; dedEl.style.opacity = '1'; }, 1200); }
+    if (pass >= TP && converged && tick > TP * TPP + 60) { phase = 'complete'; tick = 0; counterEl.textContent = 'RECALLED'; drawStars(0.8); }
+    else if (pass >= TP && !converged && tick > TP * TPP + 120) { cur = Float64Array.from(stored); phase = 'complete'; tick = 0; counterEl.textContent = 'RECALLED'; drawStars(0.8); if (!converged) { chime(); setTimeout(() => { dedEl.textContent = 'for asterism.eth  \u2014 @MystiqueMide'; dedEl.style.opacity = '1'; }, 1200); converged = true; } }
+  } else { if (tick > 300) reset(); }
+  let color, glow;
+  if (converged) { color = '#ffaa55'; glow = 0.3; } else if (phase === 'corrupt') { color = tick / CT < 0.5 ? '#33ff66' : '#66ff88'; glow = 0.04; }
+  else { const t = Math.min(pass / TP, 1); const r = 51 + t * 204, g = 255 - t * 85, b = 102 - t * 68; color = '#'+[r,g,b].map(v=>Math.round(v).toString(16).padStart(2,'0')).join(''); glow = 0.08 + t * 0.22; }
+  render(cur, color, glow);
+}
+function onInteraction() { initAudio(); document.removeEventListener('click', onInteraction); document.removeEventListener('touchstart', onInteraction); }
+document.addEventListener('click', onInteraction); document.addEventListener('touchstart', onInteraction);
+reset(); setInterval(update, 1000 / 30);
+console.log('\u2606 ASTERISM \u2014 You Taught Me the Names of the Stars');
+console.log('Network: ' + N + ' neurons, ' + onBits + ' active, ' + BATCH + '/tick async');
+console.log('Pattern: ' + WORD + '  |  \u03bb=' + LAMBDA + '  |  CRT: barrel=' + CRT.barrel + ' aberration=' + CRT.aberration + 'px');
+console.log('Key: E-flat major  |  Lyrics: Joanna Newsom, \u201cEmily\u201d (Ys, 2006)');
+console.log('Built by @MystiqueMide  |  x.com/MystiqueMide');
+</script>
+</body>
+</html>
