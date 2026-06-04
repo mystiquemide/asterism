@@ -63,26 +63,6 @@ npm run preview  # preview the build
 - Web Audio API - generative E-flat major score
 - MediaRecorder API - specimen recording
 - Vite - build tool for multi-page output
-- Vercel - deployment
-
----
-
-## Deployment
-
-### Vercel (recommended)
-
-```bash
-npm install -g vercel
-vercel
-```
-
-Or connect the GitHub repo to Vercel for auto-deploy on push.
-
-See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for details.
-
-### Any static host
-
-Run `npm run build` and serve the `dist/` directory. No server-side logic required.
 
 ---
 
