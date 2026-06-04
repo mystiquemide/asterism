@@ -36,7 +36,7 @@ Follow the prompts. Auto-detects Vite.
 
 1. Push to GitHub
 2. Go to [vercel.com](https://vercel.com), import the repo
-3. Vercel auto-detects Vite — no config needed
+3. Vercel auto-detects Vite - no config needed
 4. Set the project name to `asterism`
 
 The `vercel.json` in this repo configures the framework and clean URLs.

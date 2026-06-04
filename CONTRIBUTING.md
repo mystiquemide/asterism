@@ -19,7 +19,7 @@ Thanks for your interest in Asterism.
 
 ## Code style
 
-- Vanilla HTML/CSS/JS — no framework dependencies
+- Vanilla HTML/CSS/JS - no framework dependencies
 - Keep everything in a single file per page
 - Match the existing CRT parameter conventions
 - Test across browsers before submitting

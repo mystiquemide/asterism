@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Landing page with navigation
 - Standalone piece: "You Taught Me the Names of the Stars" (Hopfield + CRT + E-flat major + star particles + Joanna Newsom lyrics)
-- Family VIII: Asterism — interactive 7-specimen family with hidden unlock
+- Family VIII: Asterism - interactive 7-specimen family with hidden unlock
 - Hopfield network: async recall, λ=0.35 bias, energy computation
 - CRT treatment: barrel (k=0.16), aberration (3.2px), scanlines (0.08→0.34), glow (0.10), vignette (0.85)
 - Generative audio score in E-flat major
