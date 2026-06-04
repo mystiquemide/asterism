@@ -4,7 +4,12 @@
 
 [Live demo](https://asterism-art.vercel.app)
 
-![Asterism homepage](docs/screenshots/asterism-home.png)
+## Product screens
+
+| Landing | Standalone piece | Family VIII |
+|---------|------------------|-------------|
+| ![Asterism landing page](docs/screenshots/asterism-home.png) | ![Asterism standalone piece](docs/screenshots/asterism-piece.png) | ![Family VIII specimen grid](docs/screenshots/family-viii.png) |
+| Entry screen for the collection | “You Taught Me the Names of the Stars” | 7-specimen Pattern Retrieval family |
 
 ---
 
