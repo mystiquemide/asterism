@@ -93,6 +93,7 @@ let activeBits = 0;
 let word = 'SIGNAL';
 let pass = 0, tick = 0, converged = false, phase = 'corrupt';
 let ac = null;
+let cleared = false;
 
 const EB = [311.13,349.23,392.00,415.30,466.16,523.25,587.33,622.25,698.46,783.99,880.00,932.33];
 const PHRASES = [
@@ -107,8 +108,7 @@ const PHRASES = [
 ];
 
 function sanitize(value) {
-  const clean = value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 14);
-  return clean || 'SIGNAL';
+  return value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 14);
 }
 
 function initAudio() {
@@ -227,7 +227,21 @@ function toast(msg) {
   toastEl.style.opacity = '1';
   setTimeout(() => { toastEl.style.opacity = '0'; }, 1600);
 }
+function clearAll() {
+  cleared = true;
+  word = '';
+  stored = new Float64Array(N);
+  cur = new Float64Array(N);
+  activeBits = 0;
+  pass = 0; tick = 0; converged = false; phase = 'corrupt';
+  lyricEl.textContent = ''; lyricEl.style.opacity = '0';
+  counterEl.textContent = '';
+  toastEl.textContent = ''; toastEl.style.opacity = '0';
+  ctx.fillStyle = '#050505'; ctx.fillRect(0, 0, CW, CH);
+  sctx.clearRect(0, 0, CW, CH);
+}
 function reset(nextWord = word) {
+  cleared = false;
   word = sanitize(nextWord);
   buildPattern(word);
   cur = Float64Array.from(stored);
@@ -238,6 +252,7 @@ function reset(nextWord = word) {
   render(stored, '#33ff66', 0.08);
 }
 function update() {
+  if (cleared) return;
   tick++;
   if (phase === 'corrupt') {
     const frac = Math.min(tick / CT, 1) * 0.58;
@@ -273,6 +288,10 @@ formEl.addEventListener('submit', (event) => {
   event.preventDefault();
   initAudio();
   const next = sanitize(inputEl.value);
+  if (!next) {
+    clearAll();
+    return;
+  }
   inputEl.value = next;
   reset(next);
   toast('recalling ' + next);
