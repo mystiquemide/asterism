@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <!--
-  "You Taught Me the Names of the Stars"
+  Signal Retrieved From Noise
   Built by @MystiqueMide (x.com/MystiqueMide)
-  For asterism.eth - Adam Ilenich
-  Hopfield network · CRT phosphor · E-flat major
-  Joanna Newsom, "Emily" (Ys, 2006)
+  Inspired by Pattern Retrieval by Adam Ilenich
+  Hopfield-style recall · CRT phosphor · generative audio
   If you're reading this, the piece is mine. Don't strip the attribution.
 -->
 <html lang="en">
@@ -13,7 +12,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="author" content="@MystiqueMide">
 <meta name="twitter:creator" content="@MystiqueMide">
-<title>You Taught Me the Names of the Stars</title>
+<title>Signal Retrieved From Noise</title>
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 100%; height: 100%; overflow: hidden; background: #050505; }
@@ -36,10 +35,9 @@
 </div>
 <script>
 /* ================================================================
-   ASTERISM - You Taught Me the Names of the Stars
-   Hopfield network retrieving "ASTERISM" from noise.
-   CRT phosphor treatment. E-flat major generative audio.
-   Lyric fragments from Joanna Newsom's "Emily" (Ys, 2006).
+   ASTERISM - Signal Retrieved From Noise
+   Hopfield-style recall retrieving "ASTERISM" from noise.
+   CRT phosphor treatment. Generative audio follows recall state.
    ================================================================ */
 
 const CHAR_W = 12, CHAR_H = 18, GAP = 4, PX = 5;
@@ -118,7 +116,7 @@ function recallTick(vec) {
 function overlap(vec) { let m = 0; for (let i = 0; i < N; i++) if (vec[i] === stored[i]) m++; return m / N; }
 function corrupt(vec, frac) { const out = new Float64Array(vec); for (let i = 0; i < N; i++) if (Math.random() < frac) out[i] = -out[i]; return out; }
 
-// ── Audio: E-flat major ──────────────────────────────────────
+// ── Audio: generative recall score ───────────────────────────
 const EB = [311.13,349.23,392.00,415.30,466.16,523.25,587.33,622.25,698.46,783.99,880.00,932.33];
 let ac = null;
 function initAudio() { if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)(); }
@@ -135,9 +133,9 @@ function wash() { if (!ac) return; const o = ac.createOscillator(), g = ac.creat
 function bleep(n) { tone(EB[n % EB.length], 0.22, 0.035, 'square'); }
 function chime() { if (!ac) return; [EB[0],EB[2],EB[4],EB[7],EB[9]].forEach((f,i) => setTimeout(() => tone(f,1.6,0.045,'sine'), i*100)); }
 
-// ── Lyrics ───────────────────────────────────────────────────
-const LYRICS = ["you taught me the names of the stars overhead","that I wrote down in my ledger","the Pleiades loosed in December","I promised you I\u2019d set them to verse","so I\u2019d always remember","the meteorite is the source of the light","a bone thrown from the void","I\u2019ve seen your bravery and I will follow you there"];
-function showLyric(i) { lyricEl.textContent = '\u201c' + LYRICS[i % LYRICS.length] + '\u201d'; lyricEl.style.opacity = '0.82'; setTimeout(() => { lyricEl.style.opacity = '0'; }, 2600); }
+// ── Signal phrases ───────────────────────────────────────────
+const PHRASES = ["signal under the noise","memory leaves residue","the field starts answering","pattern pulled from static","recall is never clean","structure returns in fragments","noise gives up the shape","the system remembers badly"];
+function showPhrase(i) { lyricEl.textContent = PHRASES[i % PHRASES.length]; lyricEl.style.opacity = '0.82'; setTimeout(() => { lyricEl.style.opacity = '0'; }, 2600); }
 
 // ── Star particles (bigger) ────────────────────────────────
 const starPool = [];
@@ -179,15 +177,15 @@ function update() {
   tick++;
   if (phase === 'corrupt') {
     const frac = Math.min(tick / CT, 1) * 0.55; cur = corrupt(stored, frac); counterEl.textContent = Math.round(frac * 100) + '% noise';
-    if (tick === 45) { showLyric(0); wash(); }
+    if (tick === 45) { showPhrase(0); wash(); }
     if (tick >= CT) { phase = 'recall'; tick = 0; counterEl.textContent = 'PASS 0/' + TP; drawStars(0.05); }
   } else if (phase === 'recall') {
     cur = recallTick(cur);
-    const p = Math.floor(tick / TPP); if (p > pass && p <= TP) { pass = p; counterEl.textContent = 'PASS ' + pass + '/' + TP; bleep(pass); if ([2,4,6].includes(pass)) showLyric(pass / 2); }
+    const p = Math.floor(tick / TPP); if (p > pass && p <= TP) { pass = p; counterEl.textContent = 'PASS ' + pass + '/' + TP; bleep(pass); if ([2,4,6].includes(pass)) showPhrase(pass / 2); }
     const ol = overlap(cur); drawStars(ol * 0.65);
-    if (!converged && ol > 0.9) { converged = true; chime(); drawStars(0.7); setTimeout(() => { dedEl.textContent = 'for asterism.eth  \u2014 @MystiqueMide'; dedEl.style.opacity = '1'; }, 1200); }
+    if (!converged && ol > 0.9) { converged = true; chime(); drawStars(0.7); setTimeout(() => { dedEl.textContent = 'built by @MystiqueMide'; dedEl.style.opacity = '1'; }, 1200); }
     if (pass >= TP && converged && tick > TP * TPP + 60) { phase = 'complete'; tick = 0; counterEl.textContent = 'RECALLED'; drawStars(0.8); }
-    else if (pass >= TP && !converged && tick > TP * TPP + 120) { cur = Float64Array.from(stored); phase = 'complete'; tick = 0; counterEl.textContent = 'RECALLED'; drawStars(0.8); if (!converged) { chime(); setTimeout(() => { dedEl.textContent = 'for asterism.eth  \u2014 @MystiqueMide'; dedEl.style.opacity = '1'; }, 1200); converged = true; } }
+    else if (pass >= TP && !converged && tick > TP * TPP + 120) { cur = Float64Array.from(stored); phase = 'complete'; tick = 0; counterEl.textContent = 'RECALLED'; drawStars(0.8); if (!converged) { chime(); setTimeout(() => { dedEl.textContent = 'built by @MystiqueMide'; dedEl.style.opacity = '1'; }, 1200); converged = true; } }
   } else { if (tick > 300) reset(); }
   let color, glow;
   if (converged) { color = '#ffaa55'; glow = 0.3; } else if (phase === 'corrupt') { color = tick / CT < 0.5 ? '#33ff66' : '#66ff88'; glow = 0.04; }
@@ -197,10 +195,10 @@ function update() {
 function onInteraction() { initAudio(); document.removeEventListener('click', onInteraction); document.removeEventListener('touchstart', onInteraction); }
 document.addEventListener('click', onInteraction); document.addEventListener('touchstart', onInteraction);
 reset(); setInterval(update, 1000 / 30);
-console.log('\u2606 ASTERISM \u2014 You Taught Me the Names of the Stars');
+console.log('☆ ASTERISM - Signal Retrieved From Noise');
 console.log('Network: ' + N + ' neurons, ' + onBits + ' active, ' + BATCH + '/tick async');
 console.log('Pattern: ' + WORD + '  |  \u03bb=' + LAMBDA + '  |  SCALE=' + SCALE.toFixed(2) + '  |  Canvas: ' + CW + 'x' + CH);
-console.log('Key: E-flat major  |  Lyrics: Joanna Newsom, \u201cEmily\u201d (Ys, 2006)');
+console.log('Generative recall score follows corruption, pass count, and convergence');
 console.log('Built by @MystiqueMide  |  x.com/MystiqueMide');
 </script>
 </body>

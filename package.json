@@ -2,7 +2,7 @@
   "name": "asterism",
   "private": true,
   "version": "1.0.0",
-  "description": "Family VIII: Asterism — pieces for Pattern Retrieval",
+  "description": "Asterism - Pattern Retrieval remix about noisy recall",
   "author": "@MystiqueMide",
   "scripts": {
     "dev": "vite",

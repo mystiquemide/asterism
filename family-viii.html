@@ -2,9 +2,8 @@
 <!--
   Family VIII: Asterism - an 8th family for Pattern Retrieval
   Built by @MystiqueMide (x.com/MystiqueMide)
-  For asterism.eth - Adam Ilenich
-  Hopfield network · CRT phosphor · E-flat major
-  Joanna Newsom, "Emily" (Ys, 2006)
+  Inspired by Pattern Retrieval by Adam Ilenich
+  Hopfield-style recall · CRT phosphor · generative audio
   If you're reading this, the piece is mine. Don't strip the attribution.
 -->
 <html lang="en">
@@ -62,7 +61,7 @@
 <div id="header">
   PATTERN RETRIEVAL<br>
   <span class="family">FAMILY VIII: ASTERISM</span><br>
-  <span style="font-size:10px;opacity:0.5">specimens 095–100  ·  key: E-flat major  ·  not every pattern is a character</span><br>
+  <span style="font-size:10px;opacity:0.5">specimens 095-100  ·  noisy recall  ·  not every pattern is a character</span><br>
   <span style="font-size:9px;opacity:0.55;letter-spacing:1px">by @MystiqueMide</span>
 </div>
 <div id="canvas-wrap">
@@ -91,10 +90,9 @@
 <script>
 /* ===================================================================
    FAMILY VIII: ASTERISM
-   An 8th family for Pattern Retrieval. Specimens are words from
-   Joanna Newsom's "Emily" (Ys, 2006), retrieved via Hopfield
-   network with exact CRT treatment matching the original project.
-   Key: E-flat major. Hidden specimen 101 reveals the dedication.
+   A word-based Pattern Retrieval remix. Specimens are small signals
+   retrieved from noise through Hopfield-style recall and CRT treatment.
+   Hidden specimen 101 reveals the final recovered pattern.
    =================================================================== */
 
 // ── Hopfield parameters ───────────────────────────────────────
@@ -418,7 +416,7 @@ function animate() {
       // If this is the hidden specimen, show dedication
       if (activeIdx === SPECIMENS.length) {
         setTimeout(() => {
-          dedEl.textContent = 'for asterism.eth  \u2014 @MystiqueMide';
+          dedEl.textContent = 'built by @MystiqueMide';
           dedEl.style.opacity = '1';
         }, 1200);
       }
@@ -512,9 +510,9 @@ document.addEventListener('touchstart', initAudio, { once: true });
 selectSpecimen(0);
 animId = requestAnimationFrame(animate);
 
-console.log('\u2606 FAMILY VIII: ASTERISM \u2014 Pattern Retrieval');
-console.log('Specimens 095-100: lyric fragments from Joanna Newsom\u2019s \u201cEmily\u201d');
-console.log('Key: E-flat major  |  \u03bb=' + LAMBDA + '  |  CRT: barrel=' + CRT.barrel + ' aberration=' + CRT.aberration + 'px');
+console.log('☆ FAMILY VIII: ASTERISM - Pattern Retrieval remix');
+console.log('Specimens 095-100: word signals retrieved from noise');
+console.log('Recall: λ=' + LAMBDA + '  |  passes=' + TOTAL_PASSES + '  |  generative audio + CRT phosphor');
 console.log('Built by @MystiqueMide  |  x.com/MystiqueMide');
 </script>
 </body>

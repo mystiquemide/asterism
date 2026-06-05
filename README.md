@@ -1,6 +1,8 @@
 # Asterism
 
-**Family VIII: Asterism** - an 8th family for [Pattern Retrieval](https://patternretrieval.app) by Adam Ilenich (asterism.eth). Hopfield networks retrieving words from noise. CRT phosphor treatment. E-flat major generative audio. Lyric fragments from Joanna Newsom's "Emily" (Ys, 2006).
+Asterism is a browser-based Pattern Retrieval remix by [@MystiqueMide](https://x.com/MystiqueMide).
+
+It explores how structure emerges from noise through repeated recall passes, using Hopfield-style memory, pixel typography, CRT phosphor treatment, and a generative Web Audio score.
 
 [Live demo](https://asterism-art.vercel.app)
 
@@ -9,27 +11,23 @@
 | Landing | Standalone piece | Family VIII |
 |---------|------------------|-------------|
 | ![Asterism landing page](docs/screenshots/asterism-home.png) | ![Asterism standalone piece](docs/screenshots/asterism-piece.png) | ![Family VIII specimen grid](docs/screenshots/family-viii.png) |
-| Entry screen for the collection | “You Taught Me the Names of the Stars” | 7-specimen Pattern Retrieval family |
-
----
+| Entry screen for the collection | Signal Retrieved From Noise | 7-specimen Pattern Retrieval family |
 
 ## Why this exists
 
-Pattern Retrieval has 94 specimens across 7 families - all printable ASCII characters. This project adds an 8th family: words from "Emily," the Joanna Newsom song that gave Adam his ENS name. Every specimen is a memory retrieved from noise via Hopfield network, matching the original project's exact CRT parameters and recall mechanism.
+Pattern Retrieval turns noisy states into legible forms through recall. Asterism extends that feeling into a small word-based collection: signals are corrupted, pulled back through repeated passes, and left with visible residue instead of becoming perfectly clean.
 
-The asterism connection: Adam's ENS name means "a recognizable star pattern pulled from the noise of the night sky." Pattern Retrieval is the exact same concept. This family bridges the two halves of his identity.
-
----
+The title points to a small recognizable pattern inside a larger field. In this piece, the field is noise, the pattern is a recovered signal, and the recovery process is the work.
 
 ## Features
 
 - **7 specimens** (6 visible + 1 hidden): STARS, LIGHT, VOID, NAMES, EMBER, BRAVE, and the hidden ASTERISM
-- **Hopfield network**: 8 async recall passes with λ=0.35 bias, matching the original project exactly
-- **CRT treatment**: barrel distortion (k=0.16), chromatic aberration (3.2px), scanlines (0.08→0.34), phosphor glow, vignette
-- **Generative score**: E-flat major (the key of "Emily"), per-pass bleeps, corruption wash, converge chime
+- **Hopfield-style recall**: 8 async recall passes with λ=0.35 bias
+- **CRT treatment**: scanlines, phosphor glow, color drift, pixel rendering, and vignette
+- **Generative score**: per-pass bleeps, corruption wash, and converge chime driven by retrieval state
 - **Record to video**: built-in MediaRecorder captures the canvas as .webm
-- **Hidden specimen 101**: unlocks after all 6 are viewed - reveals "for asterism.eth - @MystiqueMide"
-- **Energy display**: tracks the Hopfield energy as the network settle
+- **Hidden specimen 101**: unlocks after all 6 visible specimens are viewed
+- **Energy display**: tracks the Hopfield energy as the network settles
 
 ## Quick Start
 
@@ -40,17 +38,13 @@ npm run dev
 
 Open http://localhost:5173
 
----
-
 ## Pages
 
 | Page | Description |
 |------|-------------|
 | `/` | Landing page |
-| `/asterism.html` | Standalone piece: "You Taught Me the Names of the Stars" |
+| `/asterism.html` | Standalone piece: Signal Retrieved From Noise |
 | `/family-viii.html` | Family VIII: 7 specimens with recording |
-
----
 
 ## Build
 
@@ -59,25 +53,27 @@ npm run build    # outputs to dist/
 npm run preview  # preview the build
 ```
 
----
+## What to test
+
+- Open `/` and confirm the landing page frames the project as a Pattern Retrieval remix.
+- Open `/asterism.html` and confirm the standalone piece retrieves ASTERISM from noise without personal-reference copy.
+- Open `/family-viii.html`, click through specimens 095-100, then confirm hidden specimen 101 appears.
+- Click `RECORD` on `/family-viii.html` and confirm a `.webm` file downloads.
+- Check the browser console for errors on all three pages.
 
 ## Tech Stack
 
 - Vanilla HTML/CSS/JS - no framework, no dependencies at runtime
 - Canvas API - pixel rendering + CRT post-processing
-- Web Audio API - generative E-flat major score
+- Web Audio API - generative recall score
 - MediaRecorder API - specimen recording
 - Vite - build tool for multi-page output
 
----
-
 ## Attribution
 
-Built by [@MystiqueMide](https://x.com/MystiqueMide) for [asterism.eth](https://x.com/adamilenich).
+Built by [@MystiqueMide](https://x.com/MystiqueMide).
 
-Joanna Newsom, "Emily" - Ys (2006, Drag City).
-
----
+Inspired by [Pattern Retrieval](https://patternretrieval.app) by [Adam Ilenich](https://x.com/adamilenich). This is an independent remix exploring noisy recall, reconstruction, and emergent signal.
 
 ## License
 
